@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from "react";
 // @ts-ignore
 import { KanjiWriter, KanjiVGParser } from "kanji-recognizer";
 
@@ -12,128 +12,152 @@ interface KanjiCanvasProps {
     animateOnLoad?: boolean;
 }
 
-export function KanjiCanvas({ kanji, mode, onComplete, onMistake, animateOnLoad }: KanjiCanvasProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const writerRef = useRef<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        let isMounted = true;
-
-        async function init() {
-            if (!containerRef.current) return;
-            setIsLoading(true);
-
-            try {
-                // Fetch SVG
-                const unicode = kanji.charCodeAt(0).toString(16).padStart(5, '0');
-                const res = await fetch(`/kanjivg/kanji/${unicode}.svg`);
-                if (!res.ok) throw new Error("Failed to load kanji");
-                const text = await res.text();
-
-                // @ts-ignore
-                const data = KanjiVGParser.parse(text);
-
-                if (!isMounted) return;
-
-                containerRef.current.innerHTML = '';
-                const id = `kanji-canvas-${Math.random().toString(36).substr(2, 9)}`;
-                containerRef.current.id = id;
-
-                const options: any = {
-                    width: 300,
-                    height: 300,
-                    strokeColor: "#333", // Drawing color
-                    gridColor: mode === 'challenge' ? "#333" : "#ddd", // Hide grid in challenge? keeping visible for now
-                    showGrid: true,
-                };
-
-                // Mode specific settings
-                if (mode === "view") {
-                    options.strokeWidth = 4;
-                    // In view mode, we might just want to animate. 
-                    // KanjiWriter doesn't have a "read only" mode easily without disabling interaction?
-                    // We'll handle via CSS pointer-events.
-                } else if (mode === "practice") {
-                    options.strokeWidth = 6;
-                    // Practice uses default ghosts
-                } else if (mode === "challenge") {
-                    options.strokeWidth = 6;
-                    // Hide outlines for challenge
-                    options.showCharacter = false; // "ghost" hidden
-                    options.showMuted = false;
-                }
-
-                writerRef.current = new KanjiWriter(id, data, options);
-
-                if (animateOnLoad && mode === "view") {
-                    writerRef.current.animate();
-                }
-
-                // Add event listeners for completion/mistake if supported by library
-                // The library might not expose simple callbacks. 
-                // We can "hack" it by listening to the internal state if possible, 
-                // or just rely on user clicking "Next" for practice/view.
-
-                // For 'challenge'/'practice', capturing 'success' is tricky without library support.
-                // Assuming KanjiWriter has an 'onComplete' callback in newer versions or we mimic it.
-                // Looking at library source (unavailable), we'll assume basic functionality.
-                // If the library doesn't support callbacks in the Constructor options, 
-                // we might need to patch it or use a different approach.
-                // For now, let's assume manual "I'm done" or the library emits an event.
-
-                // HACK: Shim the complete method if possible or polling?
-                // Actually `kanji-recognizer` (based on makemeahanzi/kanjivg?) usually is for recognition.
-                // If this is `kanji-canvas` (quiz), they usually track strokes.
-                // Let's assume for this prototype we use a "Check" button if auto-detect fails,
-                // OR we accept that we can't auto-detect perfectly without deeper integration.
-
-                // However, the spec says "Completion Logic".
-                // I'll add a listener to the writer instance if it has one.
-                if (writerRef.current.quiz) {
-                    // If it has quiz mode
-                    writerRef.current.quiz({
-                        onSuccess: () => onComplete?.(),
-                        onMistake: () => onMistake?.(),
-                    });
-                } else {
-                    // If no quiz mode, we might monitor strokes. 
-                    // Since I don't have the library docs, I'll rely on a manual button fallback 
-                    // if I can't find the event.
-
-                    // But wait! Kanjivg is just data. KanjiWriter (from older projects) often has `quiz`.
-                    // Let's try to hook `onCorrectStroke` or similar if it exists.
-                }
-
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        init();
-
-        return () => {
-            isMounted = false;
-            writerRef.current = null;
-        };
-    }, [kanji, mode, animateOnLoad]);
-
-    // Expose control methods
-    const animate = () => writerRef.current?.animate();
-    const clear = () => writerRef.current?.clear();
-
-    return (
-        <div className="relative">
-            <div
-                ref={containerRef}
-                className={`bg-white rounded-xl overflow-hidden ${mode === 'view' ? 'pointer-events-none' : ''}`}
-            />
-            {/* If we can't hook events, we might need a "Check" or interaction 
-                 simulated by the user just drawing. 
-                 For 'practice', usually the library prevents wrong strokes? 
-             */}
-        </div>
-    );
+export interface KanjiCanvasRef {
+    animate: () => void;
+    clear: () => void;
+    hint: () => void;
 }
+
+export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
+    ({ kanji, mode, onComplete, onMistake, animateOnLoad }, ref) => {
+        const containerRef = useRef<HTMLDivElement>(null);
+        const writerRef = useRef<any>(null);
+        const [isLoading, setIsLoading] = useState(true);
+        const [error, setError] = useState<string | null>(null);
+
+        // Expose methods via ref
+        useImperativeHandle(ref, () => ({
+            animate: () => writerRef.current?.animate(),
+            clear: () => writerRef.current?.clear(),
+            hint: () => writerRef.current?.hint(),
+        }));
+
+        useEffect(() => {
+            let isMounted = true;
+
+            async function init() {
+                if (!containerRef.current) return;
+                setIsLoading(true);
+                setError(null);
+
+                try {
+                    // Fetch SVG
+                    const unicode = kanji.charCodeAt(0).toString(16).padStart(5, '0');
+                    const res = await fetch(`/kanjivg/kanji/${unicode}.svg`);
+                    if (!res.ok) throw new Error("Failed to load kanji SVG");
+                    const text = await res.text();
+
+                    const data = KanjiVGParser.parse(text);
+
+                    if (!isMounted) return;
+
+                    // Cleanup previous instance
+                    if (writerRef.current?.destroy) {
+                        writerRef.current.destroy();
+                    }
+                    containerRef.current.innerHTML = '';
+
+                    const id = `kanji-canvas-${Math.random().toString(36).substr(2, 9)}`;
+                    containerRef.current.id = id;
+
+                    // Base options
+                    const options: any = {
+                        width: 300,
+                        height: 300,
+                        strokeColor: "#333",
+                        correctColor: "#22c55e", // Green for success
+                        incorrectColor: "#ef4444", // Red for mistakes
+                        hintColor: "#06b6d4", // Cyan for hints
+                        gridColor: "#ddd",
+                        ghostColor: "#888", // Gray ghost strokes
+                        showGrid: true,
+                        showGhost: true, // Default: show ghost strokes
+                        strokeWidth: 5,
+                        ghostOpacity: "0.3",
+                        stepDuration: 400,
+                        snapDuration: 150,
+                    };
+
+                    // Mode specific settings
+                    if (mode === "view") {
+                        options.strokeWidth = 4;
+                        options.showGhost = true;
+                        options.ghostOpacity = "0.8"; // More visible in view mode
+                    } else if (mode === "practice") {
+                        options.strokeWidth = 6;
+                        options.showGhost = true; // Show guide strokes
+                        options.ghostOpacity = "0.4";
+                        options.ghostColor = "#3b82f6"; // Blue for practice
+                    } else if (mode === "challenge") {
+                        options.strokeWidth = 6;
+                        options.showGhost = false; // Hide all ghost strokes - draw from memory
+                        options.gridColor = "#555"; // Darker grid for challenge
+                    }
+
+                    console.log(`KanjiCanvas: Initializing in ${mode} mode with showGhost=${options.showGhost}`);
+                    writerRef.current = new KanjiWriter(id, data, options);
+
+                    // Wire up callbacks
+                    if (mode !== "view") {
+                        // onComplete fires when all strokes are drawn correctly
+                        writerRef.current.onComplete = () => {
+                            console.log("KanjiCanvas: All strokes completed!");
+                            onComplete?.();
+                        };
+                    }
+
+                    // Auto-animate in view mode
+                    if (animateOnLoad && mode === "view") {
+                        // Small delay to ensure DOM is ready
+                        setTimeout(() => {
+                            if (writerRef.current?.animate) {
+                                writerRef.current.animate();
+                            }
+                        }, 100);
+                    }
+
+                } catch (e) {
+                    console.error("KanjiCanvas error:", e);
+                    setError(e instanceof Error ? e.message : "Failed to load kanji");
+                } finally {
+                    if (isMounted) {
+                        setIsLoading(false);
+                    }
+                }
+            }
+
+            init();
+
+            return () => {
+                isMounted = false;
+                // Cleanup on unmount
+                if (writerRef.current?.destroy) {
+                    writerRef.current.destroy();
+                }
+                writerRef.current = null;
+            };
+        }, [kanji, mode, animateOnLoad, onComplete]);
+
+        return (
+            <div className="relative">
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl z-10">
+                        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                    </div>
+                )}
+                {error && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded-xl z-10">
+                        <p className="text-red-500 text-sm px-4 text-center">{error}</p>
+                    </div>
+                )}
+                <div
+                    ref={containerRef}
+                    className={`bg-white rounded-xl overflow-hidden ${mode === 'view' ? 'pointer-events-none' : ''}`}
+                    style={{ minHeight: 300, minWidth: 300 }}
+                />
+            </div>
+        );
+    }
+);
+
+KanjiCanvas.displayName = "KanjiCanvas";
