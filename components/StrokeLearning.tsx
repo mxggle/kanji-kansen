@@ -1,0 +1,148 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+// @ts-ignore
+import { KanjiWriter, KanjiVGParser } from "kanji-recognizer";
+
+interface StrokeLearningProps {
+    kanji: string;
+}
+
+export function StrokeLearning({ kanji }: StrokeLearningProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const writerRef = useRef<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function initWriter() {
+            if (!containerRef.current) return;
+
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                // Clear previous content
+                containerRef.current.innerHTML = '';
+
+                // Convert char to unicode hex for KanjiVG (e.g. "日" -> "65e5")
+                const unicode = kanji.charCodeAt(0).toString(16).padStart(5, '0');
+
+                // Fetch SVG data from local public folder
+                const response = await fetch(`/kanjivg/kanji/${unicode}.svg`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to load Kanji data");
+                }
+
+                const svgText = await response.text();
+
+                // Parse SVG
+                // @ts-ignore
+                const data = KanjiVGParser.parse(svgText);
+
+                if (!data) {
+                    throw new Error("Parsed data is empty");
+                }
+
+                // Initialize Writer
+                // The library expects (elementId, data, options)
+                // We need to ensure the container has an ID
+                const containerId = "kanji-writer-container";
+                if (containerRef.current) {
+                    containerRef.current.id = containerId;
+                }
+
+                writerRef.current = new KanjiWriter(
+                    containerId,
+                    data,
+                    {
+                        width: 400,
+                        height: 400,
+                        showGrid: true,
+                        stepDuration: 300,
+                        strokeWidth: 6,
+                        strokeColor: "#333",
+                    }
+                );
+
+                // Do not auto-animate anymore as per user request
+
+            } catch (err) {
+                console.error("Failed to init kanji writer:", err);
+                setError("Failed to load stroke data");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        initWriter();
+
+        return () => {
+            // Cleanup
+            if (containerRef.current) {
+                containerRef.current.innerHTML = '';
+            }
+            writerRef.current = null;
+        };
+    }, [kanji]);
+
+    const handleHint = () => {
+        writerRef.current?.hint();
+    };
+
+    const handleAnimate = () => {
+        writerRef.current?.animate();
+    };
+
+    const handleClear = () => {
+        writerRef.current?.clear();
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center p-8 bg-black/20 rounded-xl backdrop-blur-sm border border-white/10">
+            <h2 className="text-xl font-bold mb-4 text-white/90">Stroke Order Practice</h2>
+
+            <div className="relative mb-6">
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                        <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                {error ? (
+                    <div className="w-[400px] h-[400px] flex items-center justify-center text-red-400">
+                        {error}
+                    </div>
+                ) : (
+                    <div ref={containerRef} className="bg-white rounded-lg shadow-lg overflow-hidden" />
+                )}
+            </div>
+
+            <div className="flex gap-4 mb-4">
+                <button
+                    onClick={handleHint}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-md text-white transition-all text-sm font-medium"
+                >
+                    Hint
+                </button>
+                <button
+                    onClick={handleAnimate}
+                    className="px-6 py-2 bg-[var(--accent)]/80 hover:bg-[var(--accent)] rounded-md text-white transition-all text-sm font-medium"
+                >
+                    Animation
+                </button>
+                <button
+                    onClick={handleClear}
+                    className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-md text-red-400 transition-all text-sm font-medium"
+                >
+                    Clear
+                </button>
+            </div>
+
+            <p className="text-sm text-white/50">
+                Draw here or use the buttons for guidance!
+            </p>
+        </div>
+    );
+}

@@ -3,6 +3,7 @@
 import { KanjiData } from "@/types/kanji";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
+import Link from "next/link";
 
 interface KanjiCardProps {
     data: KanjiData;
@@ -28,7 +29,8 @@ export function KanjiCard({ data, maxFreq }: KanjiCardProps) {
     }[data.jlpt];
 
     return (
-        <div
+        <Link
+            href={`/kanji/${data.char}`}
             className={cn(
                 "relative flex flex-col items-center justify-center aspect-square p-2",
                 "border-b-4 transition-all duration-200 cursor-pointer overflow-hidden",
@@ -65,6 +67,6 @@ export function KanjiCard({ data, maxFreq }: KanjiCardProps) {
                 )}
                 style={{ borderColor: "inherit" }}
             />
-        </div>
+        </Link>
     );
 }
