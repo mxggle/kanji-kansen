@@ -15,7 +15,7 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "Kanji Heatmap",
+  title: "Kanji Kaisen",
   description: "Visual Kanji frequency explorer",
 };
 

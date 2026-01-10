@@ -107,7 +107,7 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
                             <div
                                 key={idx}
                                 className={`h-1.5 w-4 rounded-full transition-colors ${idx < currentIndex ? "bg-[var(--n5)]" :
-                                        idx === currentIndex ? "bg-white" : "bg-zinc-800"
+                                    idx === currentIndex ? "bg-white" : "bg-zinc-800"
                                     }`}
                             />
                         ))}
@@ -121,7 +121,7 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 flex items-center justify-center p-4 w-full max-w-md mx-auto relative overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-4 w-full max-w-md mx-auto">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`${currentIndex}-${phase}`}
@@ -129,7 +129,7 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="w-full"
+                        className="w-full min-h-full flex items-start justify-center py-4"
                     >
                         {phase === "info" && (
                             <PhaseInfo data={currentData} onNext={handleNextPhase} />

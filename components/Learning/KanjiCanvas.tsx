@@ -16,6 +16,7 @@ export interface KanjiCanvasRef {
     animate: () => void;
     clear: () => void;
     hint: () => void;
+    getCanvasImage: () => Promise<string | null>;
 }
 
 export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
@@ -24,12 +25,45 @@ export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
         const writerRef = useRef<any>(null);
         const [isLoading, setIsLoading] = useState(true);
         const [error, setError] = useState<string | null>(null);
+        const [isInitialized, setIsInitialized] = useState(false);
 
         // Expose methods via ref
         useImperativeHandle(ref, () => ({
             animate: () => writerRef.current?.animate(),
             clear: () => writerRef.current?.clear(),
             hint: () => writerRef.current?.hint(),
+            getCanvasImage: async () => {
+                try {
+                    // Check if writer is initialized
+                    if (!isInitialized || !writerRef.current) {
+                        console.warn("KanjiCanvas: Writer not fully initialized yet");
+                        return null;
+                    }
+
+                    // Check if exportImage method exists
+                    if (typeof writerRef.current.exportImage !== 'function') {
+                        console.error("KanjiCanvas: exportImage method not available on writer");
+                        return null;
+                    }
+
+                    // Use the writer's built-in exportImage method
+                    const dataUrl = await writerRef.current.exportImage({
+                        includeGrid: false,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    if (!dataUrl) {
+                        console.warn("KanjiCanvas: exportImage returned null or empty");
+                        return null;
+                    }
+
+                    console.log("KanjiCanvas: Canvas image exported successfully using writer.exportImage(), size:", dataUrl.length);
+                    return dataUrl;
+                } catch (error) {
+                    console.error("KanjiCanvas: Failed to export canvas image:", error);
+                    return null;
+                }
+            }
         }));
 
         useEffect(() => {
@@ -56,6 +90,7 @@ export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
                         writerRef.current.destroy();
                     }
                     containerRef.current.innerHTML = '';
+                    setIsInitialized(false); // Reset initialization flag
 
                     const id = `kanji-canvas-${Math.random().toString(36).substr(2, 9)}`;
                     containerRef.current.id = id;
@@ -92,10 +127,15 @@ export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
                         options.strokeWidth = 6;
                         options.showGhost = false; // Hide all ghost strokes - draw from memory
                         options.gridColor = "#555"; // Darker grid for challenge
+                        options.checkMode = "free"; // Disable automatic stroke filling
                     }
 
                     console.log(`KanjiCanvas: Initializing in ${mode} mode with showGhost=${options.showGhost}`);
                     writerRef.current = new KanjiWriter(id, data, options);
+
+                    // Mark as initialized - canvas is ready
+                    setIsInitialized(true);
+                    console.log("KanjiCanvas: Writer initialized and ready");
 
                     // Wire up callbacks
                     if (mode !== "view") {
@@ -135,6 +175,7 @@ export const KanjiCanvas = forwardRef<KanjiCanvasRef, KanjiCanvasProps>(
                     writerRef.current.destroy();
                 }
                 writerRef.current = null;
+                setIsInitialized(false);
             };
         }, [kanji, mode, animateOnLoad, onComplete]);
 

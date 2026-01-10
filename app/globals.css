@@ -41,6 +41,10 @@ body {
   overflow-y: scroll; /* Prevent layout shift */
 }
 
+.font-japanese {
+  font-family: var(--font-jp), sans-serif;
+}
+
 /* Custom scrollbar to match the dark theme */
 ::-webkit-scrollbar {
   width: 8px;
