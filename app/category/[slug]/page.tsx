@@ -5,7 +5,7 @@ import { useEffect, useState, use } from "react";
 import { CHECKPOINTS, getCategoryFromSlug, CategoryName } from "@/lib/checkpoints";
 import { useProgressStore } from "@/lib/store";
 import { RadicalCard } from "@/components/Path/RadicalCard";
-import { Heart, Flame, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { LearningModal } from "@/components/Learning/LearningModal";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -57,21 +57,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     };
 
     return (
-        <main className="min-h-screen bg-black text-white pb-20 pt-4 relative">
-            {/* Status Bar */}
-            <div className="fixed top-4 right-4 z-50 flex items-center gap-4">
-                <div className="flex items-center gap-6 pointer-events-auto bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
-                    <div className="flex items-center gap-1.5 text-rose-500">
-                        <Heart size={20} fill="currentColor" className={hearts === 0 ? "text-gray-600" : ""} />
-                        <span className="font-bold">{hearts}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-orange-500">
-                        <Flame size={20} fill="currentColor" />
-                        <span className="font-bold">{streak}</span>
-                    </div>
-                </div>
-            </div>
-
+        <main className="min-h-screen bg-black text-white pb-20 pt-24 relative">
             {/* Header */}
             <div className="pt-8 pb-8 px-4 max-w-2xl mx-auto flex items-center gap-4">
                 <Link href="/" className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors">

@@ -78,8 +78,7 @@ export const CATEGORIES = [
     "Communication & Thought",
     "Textiles, Plants & Food",
     "States & Attributes",
-    "Time & Sequence",
-    "Others"
+    "Time & Sequence"
 ] as const;
 
 export type CategoryName = typeof CATEGORIES[number];

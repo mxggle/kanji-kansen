@@ -46,18 +46,6 @@ export default function Home() {
   const groupedCheckpoints: Record<string, typeof CHECKPOINTS> = {};
   return (
     <main className="min-h-screen bg-black text-white pb-20 relative overflow-y-auto pt-24 custom-scrollbar">
-      {/* Status Bar */}
-      <div className="fixed top-6 right-6 z-40 flex items-center gap-4 md:gap-6 pointer-events-auto bg-black/50 backdrop-blur-md px-4 md:px-6 py-2 rounded-full border border-white/10">
-        <div className="flex items-center gap-2 text-rose-500">
-          <Heart size={20} fill="currentColor" className={hearts === 0 ? "text-gray-600" : ""} />
-          <span className="font-bold text-lg">{hearts}</span>
-        </div>
-        <div className="flex items-center gap-2 text-orange-500">
-          <Flame size={20} fill="currentColor" />
-          <span className="font-bold text-lg">{streak}</span>
-        </div>
-      </div>
-
       {/* Category Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 max-w-7xl mx-auto pb-20">
         {CATEGORIES.map((category) => {
