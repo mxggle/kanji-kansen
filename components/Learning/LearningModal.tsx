@@ -33,6 +33,16 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
     const currentChar = checkpoint?.kanji[currentIndex];
     const currentData = KANJI_DATA.find(k => k.char === currentChar);
 
+    // Disable body scroll when modal is open
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
     // Handlers
     const handleNextPhase = () => {
         if (phase === "info") setPhase("practice");

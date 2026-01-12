@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_JP } from "next/font/google"; // Using Google Fonts
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -17,7 +18,7 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: "Kanji Kaisen",
-  description: "Visual Kanji frequency explorer",
+  description: "Gamified Kanji learning platform with AI stroke recognition and elemental progression paths.",
 };
 
 export default function RootLayout({
@@ -28,12 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${notoSansJP.variable} font-sans antialiased`}
+        className={`${inter.variable} ${notoSansJP.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <Header />
-        <main className="min-h-screen">
+        <main className="flex-1">
           {children}
         </main>
+        <Footer />
         <Analytics />
       </body>
     </html>
