@@ -1,4 +1,4 @@
-import { Globe, Mail, Heart } from "lucide-react";
+import { Globe, Mail, Heart, Github } from "lucide-react";
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
@@ -17,6 +17,16 @@ export function Footer() {
 
                     {/* Links */}
                     <div className="flex items-center space-x-6">
+                        <a
+                            href="https://github.com/mxggle/kanji-kaisen"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2 text-gray-400 hover:text-accent transition-colors duration-200"
+                            aria-label="GitHub Repository"
+                        >
+                            <Github className="w-5 h-5" />
+                            <span className="text-sm">GitHub</span>
+                        </a>
                         <a
                             href="https://harrysui.me"
                             target="_blank"
