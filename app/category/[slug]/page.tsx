@@ -62,7 +62,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         <main className="min-h-screen bg-black text-white pb-20 pt-24 relative">
             {/* Header */}
             <div className="pt-8 pb-8 px-4 max-w-2xl mx-auto flex items-center gap-4">
-                <Link href="/" className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+                <Link href="/learn" className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
                     <ArrowLeft size={24} />
                 </Link>
                 <div className="flex-1">

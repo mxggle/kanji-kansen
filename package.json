@@ -21,6 +21,7 @@
     "react-dom": "19.2.3",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.4.0",
+    "wanakana": "^5.3.1",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

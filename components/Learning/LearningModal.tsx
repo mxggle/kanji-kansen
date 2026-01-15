@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { PhaseInfo } from "./PhaseInfo";
 import { PhasePractice } from "./PhasePractice";
 import { PhaseChallenge } from "./PhaseChallenge";
+import { PhaseNavigator } from "./PhaseNavigator";
 
 interface LearningModalProps {
     checkpointId: string;
@@ -67,6 +68,10 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
         // We might want to shake or show visual feedback.
     };
 
+    const handlePhaseChange = (newPhase: Phase) => {
+        setPhase(newPhase);
+    };
+
     if (!checkpoint || !currentChar || !currentData) return null;
 
     if (hearts <= 0) {
@@ -101,9 +106,9 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
     }
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col">
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col h-[100dvh]">
             {/* Top Bar */}
-            <div className="flex items-center justify-between p-4 max-w-3xl mx-auto w-full">
+            <div className="flex items-center justify-between p-2 max-w-3xl mx-auto w-full">
                 <button onClick={onClose} className="p-2 bg-white/10 rounded-full hover:bg-white/20">
                     <X size={20} />
                 </button>
@@ -131,7 +136,10 @@ export function LearningModal({ checkpointId, onClose }: LearningModalProps) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-4 w-full max-w-md mx-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 w-full max-w-md mx-auto">
+                {/* Phase Navigator */}
+                <PhaseNavigator currentPhase={phase} onPhaseChange={handlePhaseChange} />
+
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`${currentIndex}-${phase}`}

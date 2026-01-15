@@ -5,8 +5,24 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Flame, BookOpen, Brain, Sparkles, Droplets, Laptop, Sword, Mountain } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 
-// Floating Kanji Background Animation
+// Floating Kanji Background Animation - Disabled on mobile for performance
 function FloatingKanji() {
+  const [isMobile, setIsMobile] = useState(true); // Default to true to prevent flash on mobile
+
+  useEffect(() => {
+    // Check if we're on mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const kanjiChars = [
     "水", "火", "木", "土", "山", "川", "日", "月", "風", "雨",
     "人", "心", "力", "手", "目", "口", "大", "小", "中", "氵"
@@ -27,6 +43,11 @@ function FloatingKanji() {
       rotateEnd: Math.random() * 360 + 180,
     }));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Don't render floating kanji on mobile devices for performance
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
