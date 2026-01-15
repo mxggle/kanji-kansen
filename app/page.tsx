@@ -130,8 +130,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 relative">
 
-      {/* Hero Section */}
-      <section className="relative h-[90vh] flex flex-col items-center justify-center overflow-hidden">
+      {/* Hero Section - Combined with Radical Demo */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-12 md:py-0">
         {/* Floating Kanji Background Animation */}
         <FloatingKanji />
 
@@ -142,129 +142,179 @@ export default function LandingPage() {
           <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, 50]) }} className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-[100px]" />
         </div>
 
-        <div className="z-10 text-center px-4 max-w-5xl mx-auto relative">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mb-8"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm mb-6 font-medium text-blue-200 backdrop-blur-sm">
-              <Sparkles size={14} className="text-yellow-400" />
-              <span>Reimagine Kanji Learning</span>
+        <div className="z-10 w-full max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+
+            {/* Left Side - Title & CTA */}
+            <div className="text-center lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="mb-6"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm mb-6 font-medium text-blue-200 backdrop-blur-sm">
+                  <Sparkles size={14} className="text-yellow-400" />
+                  <span>Reimagine Kanji Learning</span>
+                </div>
+
+                <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-4 tracking-tighter">
+                  <span className="block bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500">
+                    漢字
+                  </span>
+                  <span className="block text-3xl md:text-4xl lg:text-5xl text-gray-500 font-japanese mt-2 tracking-widest">
+                    KANJI KAISEN
+                  </span>
+                </h1>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="mb-8"
+              >
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 leading-tight">
+                  Logic, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Not Magic.</span>
+                </h2>
+                <p className="text-base md:text-lg text-gray-400 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                  Kanji are built like LEGO blocks. Once you learn the basic <span className="text-white font-medium">radicals</span>, complex characters become simple usage stories.
+                </p>
+              </motion.div>
+
+              {/* Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="flex justify-center lg:justify-start gap-6 mb-8"
+              >
+                <div className="flex flex-col">
+                  <span className="text-2xl md:text-3xl font-bold text-blue-500">214</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-widest">Radicals</span>
+                </div>
+                <div className="w-px bg-white/10 h-12"></div>
+                <div className="flex flex-col">
+                  <span className="text-2xl md:text-3xl font-bold text-pink-500">2000+</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-widest">Characters</span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Link
+                  href="/learn"
+                  className="group relative inline-flex items-center gap-4 px-8 py-4 bg-white text-black rounded-full font-bold text-base md:text-lg hover:pr-6 transition-all duration-300"
+                >
+                  <span className="relative z-10">Start Your Journey</span>
+                  <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </Link>
+              </motion.div>
             </div>
 
-            <h1 className="text-7xl md:text-9xl font-bold mb-6 tracking-tighter">
-              <span className="block bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500">
-                KANJI
-              </span>
-              <span className="block text-4xl md:text-6xl text-gray-500 font-japanese mt-2 tracking-widest">
-                廻戦
-              </span>
-            </h1>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed"
-          >
-            Don't just memorize visuals. Master the <span className="text-white font-semibold">stories</span>, <span className="text-white font-semibold">elements</span>, and <span className="text-white font-semibold">logic</span> behind every character.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link
-              href="/learn"
-              className="group relative inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-full font-bold text-lg hover:pr-8 transition-all duration-300"
+            {/* Right Side - Radical Demo */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="relative flex items-center justify-center mt-8 lg:mt-0"
             >
-              <span className="relative z-10">Start Your Journey</span>
-              <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Radical Concept Section */}
-      <section className="py-32 px-4 relative z-10 border-y border-white/5 bg-zinc-900/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-            {/* Text Side */}
-            <div className="text-left">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
-                Logic, <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Not Magic.</span>
-              </h2>
-              <p className="text-base md:text-xl text-gray-400 mb-6 md:mb-8 leading-relaxed">
-                Kanji are built like LEGO blocks. Once you learn the basic <span className="text-white">radicals</span>, complex characters become simple usage stories.
-              </p>
-
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-2">
-                  <span className="text-3xl md:text-4xl font-bold text-blue-500">214</span>
-                  <span className="text-sm text-gray-500 uppercase tracking-widest">Radicals</span>
-                </div>
-                <div className="w-px bg-white/10 mx-4 h-16"></div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-3xl md:text-4xl font-bold text-pink-500">2000+</span>
-                  <span className="text-sm text-gray-500 uppercase tracking-widest">Characters</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive Visual Side */}
-            <div className="relative h-auto md:h-[400px] flex items-center justify-center mt-8 lg:mt-0">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-[100px]" />
 
-              <div className="relative flex flex-col items-center gap-3 md:gap-4 z-10">
+              <div className="relative flex flex-col items-center gap-3 z-10">
                 {/* Left Radical */}
                 <motion.div
                   key={`l-${activeRadical}`}
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: 20, opacity: 0 }}
-                  className={`p-6 md:p-8 rounded-2xl border backdrop-blur-md ${currentExample.left.bg} ${currentExample.left.border} w-32 md:w-40 text-center`}
+                  className={`p-5 md:p-6 rounded-2xl border backdrop-blur-md ${currentExample.left.bg} ${currentExample.left.border} w-28 md:w-36 text-center`}
                 >
-                  <div className={`text-5xl md:text-6xl font-japanese font-bold mb-2 ${currentExample.left.color}`}>{currentExample.left.char}</div>
-                  <div className="text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider">{currentExample.left.name}</div>
+                  <div className={`text-4xl md:text-5xl font-japanese font-bold mb-1 ${currentExample.left.color}`}>{currentExample.left.char}</div>
+                  <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{currentExample.left.name}</div>
                 </motion.div>
 
-                <div className="text-xl md:text-2xl text-gray-600 font-bold">+</div>
+                <div className="text-lg md:text-xl text-gray-600 font-bold">+</div>
 
                 {/* Right Component */}
                 <motion.div
                   key={`r-${activeRadical}`}
                   initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  className={`p-6 md:p-8 rounded-2xl border backdrop-blur-md ${currentExample.right.bg} ${currentExample.right.border} w-32 md:w-40 text-center`}
+                  className={`p-5 md:p-6 rounded-2xl border backdrop-blur-md ${currentExample.right.bg} ${currentExample.right.border} w-28 md:w-36 text-center`}
                 >
-                  <div className={`text-5xl md:text-6xl font-japanese font-bold mb-2 ${currentExample.right.color}`}>{currentExample.right.char}</div>
-                  <div className="text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider">{currentExample.right.name}</div>
+                  <div className={`text-4xl md:text-5xl font-japanese font-bold mb-1 ${currentExample.right.color}`}>{currentExample.right.char}</div>
+                  <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{currentExample.right.name}</div>
                 </motion.div>
 
-                <div className="text-xl md:text-2xl text-gray-600 font-bold">=</div>
+                <div className="text-lg md:text-xl text-gray-600 font-bold">=</div>
 
                 {/* Result */}
                 <motion.div
                   key={`res-${activeRadical}`}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className={`p-6 md:p-8 rounded-2xl border backdrop-blur-md bg-black/80 border-white/20 w-36 md:w-48 text-center ${currentExample.result.glow}`}
+                  className={`p-5 md:p-6 rounded-2xl border backdrop-blur-md bg-black/80 border-white/20 w-32 md:w-40 text-center ${currentExample.result.glow}`}
                 >
-                  <div className={`text-5xl md:text-6xl font-japanese font-bold mb-2 ${currentExample.result.color}`}>{currentExample.result.char}</div>
-                  <div className="text-base md:text-lg font-bold text-white mb-1">{currentExample.result.name}</div>
+                  <div className={`text-4xl md:text-5xl font-japanese font-bold mb-1 ${currentExample.result.color}`}>{currentExample.result.char}</div>
+                  <div className="text-sm md:text-base font-bold text-white mb-0.5">{currentExample.result.name}</div>
                   <div className="text-xs text-gray-400">{currentExample.result.desc}</div>
                 </motion.div>
               </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Three Pillars Section */}
+      <section className="py-24 px-4 relative z-10 border-y border-white/5 bg-gradient-to-b from-zinc-900/50 to-black">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              Master Every Character Through
+            </h2>
+            <p className="text-gray-400 text-lg">Three pillars that make kanji unforgettable</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stories */}
+            <div className="group p-6 md:p-8 rounded-3xl bg-gradient-to-br from-purple-950/40 to-purple-900/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
+              <div className="w-14 h-14 mb-5 rounded-2xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+                <BookOpen className="w-7 h-7 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-purple-200">Stories</h3>
+              <p className="text-gray-400 leading-relaxed text-sm">
+                Every kanji has an origin tale. Learn <span className="text-white">mnemonic stories</span> that connect the character's shape to its meaning, making memorization effortless.
+              </p>
             </div>
 
+            {/* Elements */}
+            <div className="group p-6 md:p-8 rounded-3xl bg-gradient-to-br from-blue-950/40 to-blue-900/10 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300">
+              <div className="w-14 h-14 mb-5 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                <Droplets className="w-7 h-7 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-blue-200">Elements</h3>
+              <p className="text-gray-400 leading-relaxed text-sm">
+                Kanji are built from <span className="text-white">214 radicals</span> — elemental building blocks like Water (氵), Fire (火), and Earth (土) that reveal meaning at a glance.
+              </p>
+            </div>
+
+            {/* Logic */}
+            <div className="group p-6 md:p-8 rounded-3xl bg-gradient-to-br from-emerald-950/40 to-emerald-900/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300">
+              <div className="w-14 h-14 mb-5 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                <Brain className="w-7 h-7 text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-emerald-200">Logic</h3>
+              <p className="text-gray-400 leading-relaxed text-sm">
+                Every character follows patterns. <span className="text-white">Position clues</span> (left = category, right = sound) let you decode unfamiliar kanji with confidence.
+              </p>
+            </div>
           </div>
         </div>
       </section>
