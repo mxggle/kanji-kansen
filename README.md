@@ -12,6 +12,32 @@
 - ⚔️ **Challenge Mode**: Test your memory and precision without guides to prove your mastery.
 - 📉 **Spaced Repetition**: Efficiently review characters just as you're about to forget them.
 
+<table style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td style="border: none; padding: 10px;" align="center">
+      <a href="https://github.com/user-attachments/assets/7710bb32-8a60-4d6f-9b04-6f72f7c26414" target="_blank">
+        <img src="https://github.com/user-attachments/assets/7710bb32-8a60-4d6f-9b04-6f72f7c26414" width="300" height="600" style="object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      </a>
+    </td>
+    <td style="border: none; padding: 10px;" align="center">
+      <a href="https://github.com/user-attachments/assets/c3d5b0e5-02cd-4ef3-8f48-ce72a95328b6" target="_blank">
+        <img src="https://github.com/user-attachments/assets/c3d5b0e5-02cd-4ef3-8f48-ce72a95328b6" width="300" height="600" style="object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      </a>
+    </td>
+  </tr>
+  <tr style="border: none;">
+    <td style="border: none; padding: 10px;" align="center">
+      <a href="https://github.com/user-attachments/assets/06f8e112-1b2c-4403-b1af-21f8a9f5f89b" target="_blank">
+        <img src="https://github.com/user-attachments/assets/608f2fe9-7b11-4baf-a499-f462e6707153" width="300" height="600" style="object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      </a>
+    </td>
+    <td style="border: none; padding: 10px;" align="center">
+      <a href="https://github.com/user-attachments/assets/1908a33b-037f-49bd-b54f-4a6667ac2632" target="_blank">
+        <img src="https://github.com/user-attachments/assets/1908a33b-037f-49bd-b54f-4a6667ac2632" width="300" height="600" style="object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      </a>
+    </td>
+  </tr>
+</table>
 ## Tech Stack
 
 - **Framework**: [Next.js 15](https://nextjs.org/)
