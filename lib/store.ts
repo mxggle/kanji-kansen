@@ -19,8 +19,8 @@ interface UserProgressState {
 export const useProgressStore = create<UserProgressState>()(
     persist(
         (set, get) => ({
-            hearts: 5,
-            maxHearts: 5,
+            hearts: 10,
+            maxHearts: 10,
             streak: 0,
             lastLoginDate: null,
             completedCheckpoints: {},
@@ -62,6 +62,14 @@ export const useProgressStore = create<UserProgressState>()(
         }),
         {
             name: 'kanji-path-storage',
+            version: 1,
+            migrate: (persistedState: any, version) => {
+                if (version === 0) {
+                    persistedState.hearts = 10;
+                    persistedState.maxHearts = 10;
+                }
+                return persistedState;
+            },
         }
     )
 );

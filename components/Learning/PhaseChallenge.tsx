@@ -1,6 +1,8 @@
 import { KanjiCanvas, KanjiCanvasRef } from "./KanjiCanvas";
+import { KanjiInfoDisplay } from "./KanjiInfoDisplay";
+import { KanjiReadingHeader } from "./KanjiReadingHeader";
 import { KanjiData } from "@/types/kanji";
-import { Trash2, Undo2, Eye, EyeOff, CheckCircle, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Undo2, Eye, EyeOff, CheckCircle, Sparkles, ChevronDown, ChevronUp, ArrowUp } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface AIFeedback {
@@ -21,9 +23,12 @@ interface PhaseChallengeProps {
 export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps) {
     const [status, setStatus] = useState<"drawing" | "checking" | "success" | "fail">("drawing");
     const [showPeek, setShowPeek] = useState(false);
+    const [showGuide, setShowGuide] = useState(true);
     const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null);
     const [showAIFeedback, setShowAIFeedback] = useState(false);
+    const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
     const [isDrawerExpanded, setIsDrawerExpanded] = useState(true);
+    const [showJumpBackHint, setShowJumpBackHint] = useState(false);
     const canvasRef = useRef<KanjiCanvasRef>(null);
 
     // Auto-hide peek after 1 second
@@ -34,8 +39,15 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
         }
     }, [showPeek]);
 
+    // Auto-hide guide after 1.5 seconds
+    useEffect(() => {
+        const timer = setTimeout(() => setShowGuide(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleCheck = async () => {
         setStatus("checking");
+        setShowFeedbackOverlay(false);
 
         try {
             // Get canvas image using the writer's exportImage API
@@ -66,6 +78,7 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
                 const feedback = result.feedback;
                 setAiFeedback(feedback);
                 setShowAIFeedback(true);
+                setShowFeedbackOverlay(true);
 
                 // Check if correct based on AI confidence
                 if (feedback.isRecognizable && feedback.confidence >= 60) {
@@ -76,23 +89,28 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
                     setStatus("fail");
                     playFailSound();
                     onFail(); // Lose a heart when user gets wrong answer
+                    setShowJumpBackHint(true); // Show hint to jump back
+                    // Auto-hide hint after 5 seconds
+                    setTimeout(() => setShowJumpBackHint(false), 5000);
                     // User can try again or move on manually
                 }
             } else {
                 // If no feedback, fail
                 setStatus("fail");
                 onFail();
-                setTimeout(() => {
-                    setStatus("drawing");
-                }, 2000);
+                setShowFeedbackOverlay(true);
+                // setTimeout(() => {
+                //     setStatus("drawing");
+                // }, 2000);
             }
         } catch (error) {
             console.error("Failed to analyze kanji:", error);
             setStatus("fail");
             onFail();
-            setTimeout(() => {
-                setStatus("drawing");
-            }, 2000);
+            setShowFeedbackOverlay(true);
+            // setTimeout(() => {
+            //     setStatus("drawing");
+            // }, 2000);
         }
     };
 
@@ -101,6 +119,8 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
         setStatus("drawing");
         setAiFeedback(null);
         setShowAIFeedback(false);
+        setShowFeedbackOverlay(false);
+        setShowJumpBackHint(false);
     };
 
     const handleUndo = () => {
@@ -159,8 +179,19 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
 
     return (
         <div className={`flex flex-col items-center w-full animate-in fade-in slide-in-from-right-8 duration-500 ${showAIFeedback ? 'pb-64' : 'pb-8'}`}>
-            <h3 className="text-xl font-bold mb-2 text-zinc-400">Phase 3: Recall</h3>
-            <p className="text-sm text-zinc-500 mb-4">Draw the kanji from memory, then check</p>
+            {/* Jump Back Hint - Points to phase navigator */}
+            {showJumpBackHint && (
+                <div className="w-full mb-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-3 backdrop-blur-sm">
+                        <div className="flex items-center gap-2 text-amber-300">
+                            <ArrowUp className="w-5 h-5 animate-bounce" />
+                            <p className="text-sm font-medium">
+                                Need to review? Jump back to <span className="font-bold text-amber-200">Memorize</span> or <span className="font-bold text-amber-200">Trace</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* AI Feedback Drawer - Fixed at bottom, doesn't affect layout */}
             {showAIFeedback && aiFeedback && (
@@ -244,7 +275,11 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
                     </div>
                 )}
 
-            <div className="relative mb-4 border-2 border-dashed border-zinc-700 rounded-xl p-1 bg-black">
+            <div className="mb-2 w-full flex justify-center relative z-50">
+                <KanjiReadingHeader data={data} />
+            </div>
+
+            <div className="relative mb-2 border-2 border-dashed border-zinc-700 rounded-xl p-1 bg-black">
                 {/* Peek overlay */}
                 {showPeek && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 rounded-xl">
@@ -252,11 +287,65 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
                     </div>
                 )}
 
-                <KanjiCanvas
-                    ref={canvasRef}
-                    kanji={data.char}
-                    mode="challenge"
-                />
+                {/* Feedback Overlay */}
+                {(status === "success" || status === "fail") && showFeedbackOverlay && (
+                    <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center p-6 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300 ${status === "success"
+                        ? "bg-black/60"
+                        : "bg-black/60"
+                        }`}>
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowFeedbackOverlay(false)}
+                            className="absolute top-4 right-4 p-2 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        <div className={`p-6 rounded-2xl border backdrop-blur-xl shadow-2xl max-w-[80%] w-full text-center transform transition-all ${status === "success"
+                            ? "bg-green-500/10 border-green-500/20 shadow-green-500/10"
+                            : "bg-red-500/10 border-red-500/20 shadow-red-500/10"
+                            }`}>
+                            <div className="text-5xl mb-4 animate-bounce">
+                                {status === "success" ? "✅" : "❌"}
+                            </div>
+
+                            <h4 className={`text-2xl font-bold mb-2 ${status === "success" ? "text-green-400" : "text-red-400"
+                                }`}>
+                                {status === "success" ? "Perfect!" : "Not quite!"}
+                            </h4>
+
+                            {aiFeedback && (
+                                <div className="space-y-1">
+                                    <p className={`font-mono text-sm ${status === "success" ? "text-green-300/80" : "text-red-300/80"
+                                        }`}>
+                                        AI Confidence: {aiFeedback.confidence.toFixed(0)}%
+                                    </p>
+                                    {status === "fail" && (
+                                        <p className="text-xs text-white/40 mt-2">
+                                            Tap below to try again
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className={status !== "drawing" ? "pointer-events-none" : ""}>
+                    <KanjiCanvas
+                        ref={canvasRef}
+                        kanji={data.char}
+                        mode="challenge"
+                    />
+                </div>
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-10 transition-opacity duration-1000 ${showGuide ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className="bg-black/60 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/10 animate-pulse">
+                        <span className="text-lg font-medium text-white/90">Draw from memory</span>
+                    </div>
+                </div>
 
                 {status === "checking" && (
                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-blue-500/20 rounded-xl backdrop-blur-sm">
@@ -268,133 +357,99 @@ export function PhaseChallenge({ data, onSuccess, onFail }: PhaseChallengeProps)
                 )}
             </div>
 
-            {/* Result feedback - positioned below canvas */}
-            {status === "success" && (
-                <div className="w-full max-w-md mb-4 p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex items-center gap-3">
-                        <span className="text-4xl">✅</span>
-                        <div className="flex-1">
-                            <p className="text-white text-lg font-bold">Perfect!</p>
-                            {aiFeedback && (
-                                <p className="text-green-400 text-sm">
-                                    AI Confidence: {aiFeedback.confidence.toFixed(0)}%
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {status === "fail" && (
-                <div className="w-full max-w-md mb-4 p-4 bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex items-center gap-3">
-                        <span className="text-4xl">❌</span>
-                        <div className="flex-1">
-                            <p className="text-white text-lg font-bold">Not quite!</p>
-                            {aiFeedback && (
-                                <>
-                                    <p className="text-white/70 text-sm">
-                                        AI Confidence: {aiFeedback.confidence.toFixed(0)}%
-                                    </p>
-                                    <p className="text-white/50 text-xs mt-1">
-                                        Check the feedback below
-                                    </p>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-white mb-1">{data.meaning}</h2>
-                <div className="flex flex-col gap-0.5 text-sm text-zinc-500">
-                    <span><span className="text-[var(--n5)]">On:</span> {data.onyomi.join(", ")}</span>
-                    <span><span className="text-[var(--accent)]">Kun:</span> {data.kunyomi.join(", ")}</span>
-                </div>
-            </div>
+            {/* Removed standalone KanjiInfoDisplay - content now in header */}
+            <div className="flex-1" />
 
 
 
-            {/* Check button - prominent */}
-            {status === "drawing" && (
-                <button
-                    onClick={handleCheck}
-                    className="w-full max-w-md py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-cyan-600 hover:to-blue-600 transition-all font-bold text-lg shadow-lg"
-                >
-                    <CheckCircle size={24} />
-                    Check Answer
-                </button>
-            )}
-
-            {/* Action buttons after check */}
-            {status === "success" && (
-                <div className="w-full max-w-md space-y-3 mt-4">
-                    <button
-                        onClick={() => {
-                            // User manually proceeds to next kanji
-                            onSuccess();
-                        }}
-                        className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-green-600 hover:to-emerald-600 transition-all font-bold text-lg shadow-lg"
-                    >
-                        Continue →
-                    </button>
-                    <button
-                        onClick={() => {
-                            setStatus("drawing");
-                            setAiFeedback(null);
-                            setShowAIFeedback(false);
-                            canvasRef.current?.clear();
-                        }}
-                        className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
-                    >
-                        Practice Again
-                    </button>
-                </div>
-            )}
-
-            {status === "fail" && (
-                <div className="w-full max-w-md space-y-3 mt-4">
-                    <button
-                        onClick={() => {
-                            setStatus("drawing");
-                            setAiFeedback(null);
-                            setShowAIFeedback(false);
-                            canvasRef.current?.clear();
-                        }}
-                        className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-lg"
-                    >
-                        Try Again
-                    </button>
-                    <button
-                        onClick={() => {
-                            onSuccess(); // Move to next kanji (heart already lost)
-                        }}
-                        className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
-                    >
-                        Skip to Next
-                    </button>
-                </div>
-            )}
             {/* Control buttons */}
-            <div className="flex gap-3 w-full max-w-md mt-4">
+            <div className="flex gap-3 mb-4 w-full max-w-xs z-10">
                 <button
                     onClick={handleClear}
-                    className="flex-1 py-3 bg-zinc-800 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                    className="flex-1 py-2 bg-zinc-800 text-white rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors text-sm disabled:opacity-50"
                     disabled={status === "checking"}
                 >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                     Clear
                 </button>
                 <button
                     onClick={handlePeek}
-                    className="flex-1 py-3 bg-zinc-800 text-amber-400 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                    className="flex-1 py-2 bg-zinc-800 text-amber-400 rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors text-sm disabled:opacity-50"
                     disabled={status === "checking"}
                 >
-                    {showPeek ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPeek ? <EyeOff size={16} /> : <Eye size={16} />}
                     Peek
                 </button>
             </div>
+
+            {/* Sticky Action Footer */}
+            <div className="sticky bottom-0 left-0 right-0 w-[calc(100%+2rem)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/95 to-transparent pt-6 -mx-4 mt-auto z-40">
+                {/* Check button - prominent */}
+                {status === "drawing" && (
+                    <button
+                        onClick={handleCheck}
+                        className="w-full max-w-md py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-cyan-600 hover:to-blue-600 transition-all font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+                    >
+                        <CheckCircle size={24} />
+                        Check Answer
+                    </button>
+                )}
+
+                {/* Action buttons after check */}
+                {status === "success" && (
+                    <div className="w-full max-w-md space-y-3">
+                        <button
+                            onClick={() => {
+                                // User manually proceeds to next kanji
+                                onSuccess();
+                            }}
+                            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-green-600 hover:to-emerald-600 transition-all font-bold text-lg shadow-lg shadow-green-500/20 active:scale-[0.98]"
+                        >
+                            Continue →
+                        </button>
+                        <button
+                            onClick={() => {
+                                setStatus("drawing");
+                                setAiFeedback(null);
+                                setShowAIFeedback(false);
+                                setShowFeedbackOverlay(false);
+                                canvasRef.current?.clear();
+                            }}
+                            className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+                        >
+                            Practice Again
+                        </button>
+                    </div>
+                )}
+
+                {status === "fail" && (
+                    <div className="w-full max-w-md space-y-3">
+                        <button
+                            onClick={() => {
+                                setStatus("drawing");
+                                setAiFeedback(null);
+                                setShowAIFeedback(false);
+                                setShowFeedbackOverlay(false);
+                                canvasRef.current?.clear();
+                            }}
+                            className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center gap-2 hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-lg shadow-red-500/20 active:scale-[0.98]"
+                        >
+                            Try Again
+                        </button>
+                        <button
+                            onClick={() => {
+                                onSuccess(); // Move to next kanji (heart already lost)
+                            }}
+                            className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+                        >
+                            Skip to Next
+                        </button>
+                    </div>
+                )}
+            </div>
+
+
         </div>
     );
 }
+

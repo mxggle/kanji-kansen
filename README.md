@@ -17,7 +17,7 @@
 - **Framework**: [Next.js 15](https://nextjs.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Recognition**: [Kanji Recognizer](https://github.com/helmio/kanji-recognizer)
+- **Recognition**: [Kanji Recognizer](https://github.com/mxggle/kanji-recognizer)
 - **AI/LLM**: Google Gemini (for content generation/feedback)
 
 ## Getting Started

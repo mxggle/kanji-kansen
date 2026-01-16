@@ -1,4 +1,6 @@
 import { KanjiCanvas, KanjiCanvasRef } from "./KanjiCanvas";
+import { KanjiInfoDisplay } from "./KanjiInfoDisplay";
+import { KanjiReadingHeader } from "./KanjiReadingHeader";
 import { KanjiData } from "@/types/kanji";
 import { ArrowRight, Play } from "lucide-react";
 import { useRef } from "react";
@@ -17,9 +19,11 @@ export function PhaseInfo({ data, onNext }: PhaseInfoProps) {
 
     return (
         <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h3 className="text-xl font-bold mb-4 text-zinc-400">Phase 1: Memorize</h3>
+            <div className="mb-2 w-full flex justify-center relative z-50">
+                <KanjiReadingHeader data={data} />
+            </div>
 
-            <div className="mb-4 relative">
+            <div className="mb-6 relative">
                 <KanjiCanvas
                     ref={canvasRef}
                     kanji={data.char}
@@ -36,20 +40,20 @@ export function PhaseInfo({ data, onNext }: PhaseInfoProps) {
                 </button>
             </div>
 
-            <div className="text-center mb-8 space-y-2">
-                <h2 className="text-4xl font-bold text-white">{data.meaning}</h2>
-                <div className="flex flex-col gap-1 text-zinc-400">
-                    <p><span className="text-[var(--n5)]">Onyomi:</span> {data.onyomi.join(", ") || "—"}</p>
-                    <p><span className="text-[var(--accent)]">Kunyomi:</span> {data.kunyomi.join(", ") || "—"}</p>
-                </div>
+            {/* Removed standalone KanjiInfoDisplay - content now in header */}
+            <div className="flex-1" />
+
+            <div className="sticky bottom-0 left-0 right-0 w-[calc(100%+2rem)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/95 to-transparent pt-12 -mx-4 mt-auto">
+                <button
+                    onClick={onNext}
+                    className="w-full py-4 bg-white text-black font-bold text-lg rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors shadow-lg active:scale-[0.98] transition-all"
+                >
+                    Start Practice <ArrowRight />
+                </button>
             </div>
 
-            <button
-                onClick={onNext}
-                className="w-full py-4 bg-white text-black font-bold text-lg rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors"
-            >
-                Start Practice <ArrowRight />
-            </button>
+            {/* Spacer to allow scrolling content above sticky footer */}
+            <div className="h-8" />
         </div>
     );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
 import { KanjiWriter, KanjiVGParser } from "kanji-recognizer";
+import { Trash2, Play, Lightbulb } from "lucide-react";
 
 interface StrokeLearningProps {
     kanji: string;
@@ -103,7 +104,7 @@ export function StrokeLearning({ kanji }: StrokeLearningProps) {
         <div className="flex flex-col items-center justify-center p-8 bg-black/20 rounded-xl backdrop-blur-sm border border-white/10">
             <h2 className="text-xl font-bold mb-4 text-white/90">Stroke Order Practice</h2>
 
-            <div className="relative mb-6">
+            <div className="relative mb-2">
                 {isLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
                         <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
@@ -119,23 +120,26 @@ export function StrokeLearning({ kanji }: StrokeLearningProps) {
                 )}
             </div>
 
-            <div className="flex gap-4 mb-4">
+            <div className="flex gap-2 mb-4 w-full max-w-sm z-10">
                 <button
                     onClick={handleHint}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-md text-white transition-all text-sm font-medium"
+                    className="flex-1 py-2 bg-zinc-800 text-amber-400 rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors text-sm font-medium"
                 >
+                    <Lightbulb size={16} />
                     Hint
                 </button>
                 <button
                     onClick={handleAnimate}
-                    className="px-6 py-2 bg-[var(--accent)]/80 hover:bg-[var(--accent)] rounded-md text-white transition-all text-sm font-medium"
+                    className="flex-1 py-2 bg-zinc-800 text-cyan-400 rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors text-sm font-medium"
                 >
+                    <Play size={16} />
                     Animation
                 </button>
                 <button
                     onClick={handleClear}
-                    className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-md text-red-400 transition-all text-sm font-medium"
+                    className="flex-1 py-2 bg-zinc-800 text-white rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors text-sm font-medium"
                 >
+                    <Trash2 size={16} />
                     Clear
                 </button>
             </div>
